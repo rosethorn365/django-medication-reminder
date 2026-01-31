@@ -26,3 +26,41 @@ Djangon haasteet:
 Vaikka Django on turvallinen ja “secure‑by‑default”, viime vuosien CVE‑haavoittuvuudet osoittavat, että myös sen ORM ja ydinrakenteet voivat altistua riskeille. Vuonna 2025 löydettiin useita vakavia SQL‑injektiohaavoittuvuuksia, erityisesti tilanteissa joissa käyttäjän syöte päätyy dictionary‑laajennuksena QuerySet‑kutsuihin. Näitä ovat mm. CVE‑2025‑64459, joka mahdollistaa ehtorakenteiden manipuloinnin ja SQL‑kyselyiden injektoinnin, sekä CVE‑2025‑59681, joka koskee annotate/alias‑kutsujen injektiota MySQL/MariaDB‑ympäristöissä. Lisäksi joissain PostgreSQL‑tilanteissa FilteredRelation‑toiminnallisuus on altistunut SQL‑injektiolle (CVE‑2025‑13372). [cyberpress.org] [djangoproject.com] [djangoproject.com]
 Django on kokenut myös DoS‑haavoittuvuuksia, kuten Windows‑järjestelmiin vaikuttavan Unicode‑normalisointivirheen (CVE‑2025‑64458)  sekä XML‑serializerin algoritmisen kompleksisuuden aiheuttaman kuormittumisen (CVE‑2025‑64460). Lisäksi tietyt kehitystyökalut, kuten archive.extract(), ovat olleet alttiita directory traversal ‑hyökkäyksille (CVE‑2025‑59682). [cyberpress.org] [djangoproject.com] [djangoproject.com]
 Frameworkin ulkopuolella monet tietoturvariskit johtuvat kehittäjän tekemistä konfiguraatio‑ tai validaatiovirheistä. Yleisiä riskejä ovat XSS, CSRF, clickjacking ja heikko sessiohallinta, mikä korostaa oikeiden suojausten (esim. CSP, csrf_token, X_FRAME_OPTIONS) tärkeyttä. [linkedin.com]
+
+Django projektin rakenne: 
+
+DJANGO_DEMO/
+├─ demo/                 # Django-app (varsinainen lääkemuistutin)
+│  ├─ migrations/        # tietokantamigraatiot (001_initial.py)
+│  ├─ static/demo/       # CSS ja muut staattiset tiedostot
+│  │  └─ style.css
+│  ├─ templates/demo/    # HTML-templatet
+│  │  ├─ hello.html
+│  │  └─ reminders.html
+│  ├─ admin.py           # admin-näkymän rekisteröinti
+│  ├─ apps.py            # app-konfiguraatio
+│  ├─ forms.py           # lomakkeet + validointi
+│  ├─ models.py          # tietokantamallit
+│  ├─ urls.py            # appin URL-reitit (esim. /reminders/)
+│  ├─ views.py           # näkymät (CRUD-logiikka)
+│  └─ ...
+├─ myproject/            # Django-projekti (asetukset ja pääreititys)
+│  ├─ settings.py        # DB-asetukset, middleware, static, templates...
+│  ├─ urls.py            # project-level URLConf (include demo.urls)
+│  ├─ wsgi.py / asgi.py  # deploy/serving entrypointit
+├─ db.sqlite3            # käytössä oleva tietokanta (kehityksessä)
+├─ manage.py             # Django CLI (runserver, migrate, ...)
+├─ requirements.txt      # riippuvuudet
+└─ venv/                 # virtuaaliympäristö
+
+Projekti on rakennettu Djangolla käyttäen MVT-rakennetta: models.py määrittelee tietokantamallin ja migraatiot (migrations/) luovat taulut automaattisesti, forms.py hoitaa lomakkeet ja palvelinpuolen validoinnin, views.py sisältää CRUD-logiikan ja templates/demo/ renderöi käyttöliittymän server-side. Tyylit ja tulostusnäkymä on toteutettu static/demo/style.css -tiedostossa (mm. @media print). Verrattuna erilliseen HTML/CSS/JS + MySQL -ratkaisuun Django kokoaa tietokannan, lomakkeet, validoinnin, reitityksen ja CRUD-toiminnot yhteen kehykseen ilman erillistä API-kerrosta ja manuaalista SQL-skeeman hallintaa.
+
+Kun käyttäjä avaa sovelluksen esimerkiksi osoitteessa /reminders/, Django ohjaa pyynnön ensin projektin myproject/urls.py‑tiedostosta appin demo/urls.py‑reitteihin, jotka määrittelevät mikä näkymä käsittelee pyynnön. views.py huolehtii sovelluksen logiikasta: GET‑pyynnöllä se luo lomakkeen, hakee kaikki muistutukset tietokannasta ORM:n avulla ja palauttaa valmiiksi renderöidyn reminders.html‑templaten, kun taas POST‑pyynnöllä se lukee ja validoi käyttäjän syötteen forms.py:n kautta ja tallentaa uuden tietueen models.py‑mallien avulla ennen listan päivittämistä. Poistossa view vastaanottaa muistutuksen id:n URL:sta ja poistaa rivin tietokannasta. Tietokantarakenne määritellään models.py:ssä ja Django luo sekä ylläpitää fyysisen tietokantataulun automaattisesti migraatioilla, jolloin manuaalisia SQL‑komentoja ei tarvita. forms.py huolehtii kenttien määrittelystä ja palvelinpuolen validoinnista, kun taas templates/demo/ sisältää käyttöliittymän, joka renderöidään palvelimella (lomake, lista ja poisto‑painikkeet). Staattiset tyylit, saavutettavuus ja tulostusnäkymä on toteutettu static/demo/style.css:ssä, ja admin.py mahdollistaa muistutusten hallinnan automaattisesti luodussa admin‑paneelissa. Verrattuna siihen, että rakentaisit saman sovelluksen erikseen HTML/CSS/JS‑fronttina ja käsin luotuna MySQL‑tietokantana, Django yhdistää tietokannan, lomakkeet, validoinnin, näkymät, reitityksen, template‑renderöinnin ja CRUD‑toiminnot samaan kehykseen ilman erillistä API‑kerrosta, manuaalisia SQL‑taulujen määrittelyjä, kaksinkertaista validointia tai frontin ja backendin välistä monimutkaista datansynkronointia.
+
+C – Create → uuden tietueen luominen (esim. lisää uusi lääkemuistutus)
+R – Read → tietojen lukeminen ja näyttäminen (esim. listaa kaikki muistutukset)
+U – Update → olemassa olevan tietueen päivittäminen (esim. muokkaa muistutusta)
+D – Delete → tietueen poistaminen (esim. poista muistutus)
+
+
+
