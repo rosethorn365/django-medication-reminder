@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hello</title>
+</head>
+<body style="font-family: system-ui; max-width: 720px; margin: 40px auto; padding: 0 16px;">
+
+  <h1>Hello 👋</h1>
+
+  <p>Kirjoita alle jotain ja lähetä lomake.</p>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <label for="msg">Viesti</label><br />
+    <input
+      id="msg"
+      name="message"
+      type="text"
+      placeholder="Esim. Moi Django!"
+      value="{{ message|default_if_none:'' }}"
+      style="padding: 10px; width: 100%; max-width: 420px; margin-top: 6px;"
+    />
+
+    <div style="margin-top: 12px;">
+      <button type="submit" style="padding: 10px 14px;">Lähetä</button>
+    </div>
+  </form>
+
+  {% if submitted_message %}
+    <hr style="margin: 24px 0;" />
+    <h2>Palautus serveriltä</h2>
+    <p><strong>Syötit:</strong> {{ submitted_message }}</p>
+  {% endif %}
+
+  {% if error %}
+    <p style="color: #b00020;"><strong>Virhe:</strong> {{ error }}</p>
+  {% endif %}
+
+</body>
+</html>

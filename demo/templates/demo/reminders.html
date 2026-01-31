@@ -1,0 +1,104 @@
+{% load static %}
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lääkemuistutin</title>
+  <link rel="stylesheet" href="{% static 'demo/style.css' %}">
+</head>
+
+<body>
+  <a class="skip-link" href="#content">Siirry sisältöön</a>
+
+  <header class="site-header">
+    <h1>Lääkemuistutin <span aria-hidden="true">💊</span></h1>
+    <p class="lead">Lisää muistutus ja hallitse listaa. Tulostuksessa näkyy vain lista.</p>
+  </header>
+
+  <main id="content" class="layout" tabindex="-1">
+
+    <!-- LISÄYSLOMAKE (piilotetaan printissä) -->
+    <section class="card no-print" aria-labelledby="add-title">
+      <h2 id="add-title">Lisää muistutus</h2>
+
+      <div class="sr-only" aria-live="polite">
+        {% if form.errors %}Lomakkeessa on virheitä. Tarkista kentät.{% endif %}
+      </div>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <p class="help">Vinkki: käytä tab-näppäintä kentästä toiseen. Kellonaika toimii myös käsin kirjoittamalla.</p>
+
+        <div>
+          <label for="{{ form.medication_name.id_for_label }}">Lääkkeen nimi</label>
+          {{ form.medication_name }}
+          {% if form.medication_name.errors %}
+            <div class="error" role="alert">{{ form.medication_name.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div style="margin-top:12px;">
+          <label for="{{ form.dosage.id_for_label }}">Annostus <span class="help">(valinnainen)</span></label>
+          {{ form.dosage }}
+        </div>
+
+        <div style="margin-top:12px;">
+          <label for="{{ form.time_of_day.id_for_label }}">Kellonaika</label>
+          {{ form.time_of_day }}
+          {% if form.time_of_day.errors %}
+            <div class="error" role="alert">{{ form.time_of_day.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div style="margin-top:12px;">
+          <label for="{{ form.instructions.id_for_label }}">Ohje <span class="help">(valinnainen)</span></label>
+          {{ form.instructions }}
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Tallenna muistutus</button>
+          <button class="btn btn-ghost" type="button" onclick="window.print()">Tulosta lista</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- LISTAUS -->
+    <section class="card" aria-labelledby="list-title">
+      <h2 id="list-title">Muistutukset</h2>
+
+      {% if items %}
+        <ul class="list" aria-label="Muistutuslista">
+          {% for item in items %}
+            <li class="item">
+              <div class="item-top">
+                <div>
+                  <p class="item-title">
+                    {{ item.medication_name }}
+                    {% if item.dosage %}<span class="help">— {{ item.dosage }}</span>{% endif %}
+                  </p>
+                  <div class="item-meta">⏰ {{ item.time_of_day }}</div>
+                </div>
+
+                <!-- Poisto piilotetaan printissä -->
+                <form class="no-print" method="post" action="{% url 'reminder_delete' item.pk %}">
+                  {% csrf_token %}
+                  <button class="btn btn-danger" type="submit">Poista</button>
+                </form>
+              </div>
+
+              {% if item.instructions %}
+                <div class="item-notes">📝 {{ item.instructions }}</div>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="lead">Ei vielä muistutuksia. Lisää ensimmäinen lomakkeella.</p>
+      {% endif %}
+    </section>
+
+  </main>
+</body>
+</html>
