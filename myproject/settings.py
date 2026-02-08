@@ -10,115 +10,177 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+# Tuodaan Path-luokka, jolla käsitellään tiedostopolkuja selkeästi ja turvallisesti.
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Rakennetaan projektin "peruskansio" (BASE_DIR).
+# Tämä on projektin juurikansio, jonka alle esim. tietokanta ja muut tiedostot yleensä tulevat.
+# Path(__file__) = tämä tiedosto (settings.py)
+# resolve() = tekee siitä "varman" absoluuttisen polun
+# parent.parent = mennään kaksi kansiotasoa ylöspäin projektin juureen
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# ----------------------------
+# Nopean kehityksen asetukset
+# (ei sopiva tuotantoon)
+# ----------------------------
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$fdf+k__f2*su8g%-&u$f4*l^i%^gw7d-@n4eq+lth^a%7n9ga'
+# TÄRKEÄ TURVAVAROITUS:
+# SECRET_KEY on salainen avain, jota Django käyttää mm. istuntoihin (sessions),
+# CSRF-suojaukseen ja muihin turvallisuusasioihin.
+# Tuotannossa tämä avain pitää pitää salassa.
+SECRET_KEY = 'django-insecure-$fdf+k__f2*su8g%-&amp;u$f4*l^i%^gw7d-@n4eq+lth^a%7n9ga'
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = True tarkoittaa: kehitystila on päällä.
+# Kehitystilassa Django näyttää tarkkoja virheilmoituksia.
+# Tuotannossa DEBUG pitää olla False, ettei käyttäjille näy liikaa tietoa.
 DEBUG = True
 
+# ALLOWED_HOSTS kertoo, mistä osoitteista (domain / IP) projektia saa käyttää.
+# Tyhjä lista [] tarkoittaa käytännössä: kehitysympäristössä yleensä ok,
+# mutta tuotannossa tähän lisätään esim. "example.com" tai palvelimen IP.
 ALLOWED_HOSTS = []
 
 
-# Application definition
+# ----------------------------
+# Sovellusten määrittely
+# ----------------------------
 
+# INSTALLED_APPS-lista kertoo, mitkä Django-sovellukset ovat käytössä.
+# Näihin kuuluvat Djangon omat perusosat (admin, kirjautuminen jne.)
+# ja lisäksi sinun oma sovelluksesi (tässä: 'demo', esim. lääkemuistutussovellus).
 INSTALLED_APPS = [
+    # Djangon hallintapaneeli (admin-sivusto).
     'django.contrib.admin',
+
+    # Djangon käyttäjähallinta (kirjautuminen, käyttäjät, salasanat).
     'django.contrib.auth',
+
+    # Sisältötyypit (Djangon sisäinen järjestelmä mallien käsittelyyn).
     'django.contrib.contenttypes',
+
+    # Istunnot (sessions): muistaa esim. kirjautumisen selaimen ja palvelimen välillä.
     'django.contrib.sessions',
+
+    # Viestit (messages): esim. "Tallennus onnistui" -ilmoitukset.
     'django.contrib.messages',
+
+    # Staattiset tiedostot: CSS, JavaScript, kuvat.
     'django.contrib.staticfiles',
-    
+
+    # Sinun oma sovellus (esim. lääkemuistutusten luonti, lista ja poisto).
     'demo',
 ]
 
+
+# ----------------------------
+# Middleware (väliohjelmat)
+# ----------------------------
+
+# MIDDLEWARE on lista "välikerroksista", jotka käsittelevät pyyntöjä ja vastauksia.
+# Ne lisäävät turvallisuutta, istuntoja, CSRF-suojaa, kirjautumista jne.
 MIDDLEWARE = [
+    # Turvallisuusasetuksia (esim. tiettyjä HTTP-otsikoita).
     'django.middleware.security.SecurityMiddleware',
+
+    # Istunnot käyttöön (session).
     'django.contrib.sessions.middleware.SessionMiddleware',
+
+    # Yleiset web-asetukset (esim. perus HTTP-ominaisuudet).
     'django.middleware.common.CommonMiddleware',
+
+    # CSRF-suoja: estää haitallisia lomakepyyntöjä.
+    # Tämä on tärkeä, jos sovelluksessa on esim. "lisää muistutus" -lomake.
     'django.middleware.csrf.CsrfViewMiddleware',
+
+    # Kirjautuminen ja käyttäjä tieto pyyntöihin.
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+
+    # Viestien (messages) tuki.
     'django.contrib.messages.middleware.MessageMiddleware',
+
+    # Suojaa klikkikaappaukselta (clickjacking).
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# ROOT_URLCONF kertoo, missä tiedostossa projektin pää-URLit määritellään.
+# Yleensä tämä on myproject/urls.py
 ROOT_URLCONF = 'myproject.urls'
 
+
+# ----------------------------
+# Template-asetukset (HTML-sivut)
+# ----------------------------
+
+# TEMPLATES kertoo, miten Django etsii ja renderöi HTML-templatet (sivupohjat).
 TEMPLATES = [
     {
+        # Käytetään Djangon omaa template-järjestelmää.
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+
+        # DIRS on lista kansioista, joista templatet etsitään.
+        # Tyhjä lista [] tarkoittaa: ei erillistä template-kansiota tässä,
+        # vaan käytetään sovellusten omia template-kansioita (APP_DIRS=True).
         'DIRS': [],
+
+        # APP_DIRS=True tarkoittaa: etsi templateja myös jokaisen appin sisältä.
+        # Esim. demo/templates/...
         'APP_DIRS': True,
+
+        # OPTIONS sisältää lisäasetuksia.
         'OPTIONS': {
+            # context_processors lisää automaattisesti tietoa templateihin,
+            # esim. request-objekti, kirjautunut käyttäjä ja viestit.
             'context_processors': [
+                # Lisää request-objektin templateen.
                 'django.template.context_processors.request',
+
+                # Lisää kirjautumis- ja käyttäjätiedot templateen.
                 'django.contrib.auth.context_processors.auth',
+
+                # Lisää messages-viestit templateen.
                 'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
 
+
+# ----------------------------
+# WSGI (perinteinen palvelintapa)
+# ----------------------------
+
+# WSGI_APPLICATION kertoo, mikä on WSGI-sovelluksen polku.
+# Tätä käytetään usein perinteisessä tuotantopalvelussa (ei WebSocket).
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# ----------------------------
+# Tietokanta
+# ----------------------------
 
+# DATABASES määrittää, mitä tietokantaa käytetään.
+# Tässä käytetään SQLitea, joka tallentaa tiedot yhteen tiedostoon: db.sqlite3
+# Se sopii hyvin kehitykseen ja pieneen käyttöön.
+# Lääkemuistutussovelluksessa tänne tallentuvat esim. muistutukset ja käyttäjät.
 DATABASES = {
     'default': {
+        # Käytetään SQLite-tietokantaa.
         'ENGINE': 'django.db.backends.sqlite3',
+
+        # Tietokannan tiedoston sijainti.
+        # BASE_DIR / 'db.sqlite3' tarkoittaa: projektin juureen tiedosto db.sqlite3
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+# ----------------------------
+# Salasanan tarkistukset
+# ----------------------------
 
+# AUTH_PASSWORD_VALIDATORS määrittää, miten vahvoja salasanojen pitää olla.
+# Tämä auttaa turvallisuudessa, jos sovelluksessa on käyttäjätunnukset.
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
