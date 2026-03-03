@@ -14,29 +14,8 @@ Sovelluksen voi käynnistää aktivoimalla virtuaaliympäristön, asentamalla ta
 
 Django projektin rakenne: 
 
-DJANGO_DEMO/
-├─ demo/                 # Django-app (varsinainen lääkemuistutin)
-│  ├─ migrations/        # tietokantamigraatiot (001_initial.py)
-│  ├─ static/demo/       # CSS ja muut staattiset tiedostot
-│  │  └─ style.css
-│  ├─ templates/demo/    # HTML-templatet
-│  │  ├─ hello.html
-│  │  └─ reminders.html
-│  ├─ admin.py           # admin-näkymän rekisteröinti
-│  ├─ apps.py            # app-konfiguraatio
-│  ├─ forms.py           # lomakkeet + validointi
-│  ├─ models.py          # tietokantamallit
-│  ├─ urls.py            # appin URL-reitit (esim. /reminders/)
-│  ├─ views.py           # näkymät (CRUD-logiikka)
-│  └─ ...
-├─ myproject/            # Django-projekti (asetukset ja pääreititys)
-│  ├─ settings.py        # DB-asetukset, middleware, static, templates...
-│  ├─ urls.py            # project-level URLConf (include demo.urls)
-│  ├─ wsgi.py / asgi.py  # deploy/serving entrypointit
-├─ db.sqlite3            # käytössä oleva tietokanta (kehityksessä)
-├─ manage.py             # Django CLI (runserver, migrate, ...)
-├─ requirements.txt      # riippuvuudet
-└─ venv/                 # virtuaaliympäristö
+<img width="633" height="631" alt="image" src="https://github.com/user-attachments/assets/c2d14c94-f9bc-411f-8829-39832f261194" />
+
 
 
 
