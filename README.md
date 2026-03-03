@@ -14,7 +14,7 @@ Sovelluksen voi käynnistää aktivoimalla virtuaaliympäristön, asentamalla ta
 
 Django projektin rakenne: 
 
-<img width="633" height="631" alt="image" src="https://github.com/user-attachments/assets/c2d14c94-f9bc-411f-8829-39832f261194" />
+<img width="633" height="631" alt="image" src="https://github.com/user-attachments/assets/ba86559b-303f-4c2b-accb-2b6e0a7ebec1" />
 
 
 
